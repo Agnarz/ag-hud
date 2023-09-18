@@ -4,10 +4,14 @@ lua54 'yes'
 game 'gta5'
 
 name 'ag-hud'
-version '0.0.0'
+version '0.1.0'
 description 'HUD for FiveM'
 author 'Agnarz'
 repository 'https://github.com/Agnarz/ag-hud'
+
+shared_script '@ox_lib/init.lua'
+client_script 'client.lua'
+server_script 'server.lua'
 
 ui_page 'web/build/index.html'
 
@@ -15,7 +19,3 @@ files {
   'web/build/index.html',
   'web/build/**/*',
 }
-
-shared_script '@ox_lib/init.lua'
-client_script 'client.lua'
-server_script 'server.lua'
