@@ -34,17 +34,19 @@ export interface PlayerHudProps {
 const PlayerHud: React.FC = () => {
   const { classes } = useStyles();
   const [visible, setVisible] = useState(true);
-  const [voiceValue, setVoice] = useState(0);
+  const [voice, setVoice] = useState(0);
   const [voiceColor, setVoiceColor] = useState("#ffffff");
   const [voiceIcon, setVoiceIcon] = useState("fas fa-microphone");
-  const [healthValue, setHealth] = useState(0);
+  const [health, setHealth] = useState(0);
   const [healthColor, setHealthColor] = useState("#40C057");
   const [healthIcon, setHealthIcon] = useState("fas fa-heart");
-  const [armourValue, setArmour] = useState(0);
+  const [armour, setArmour] = useState(0);
   const [armourColor, setArmourColor] = useState("#1C7ED6");
-  const [staminaValue, setStamina] = useState(0);
-  const [armedValue, setArmed] = useState(false);
-  const [devValue, setDev] = useState(false);
+  const [stamina, setStamina] = useState(0);
+  const [armed, setArmed] = useState(false);
+  const [vehicleVisible, setVehicleVisible] = useState(false);
+  const [engine, setEngine] = useState(0);
+  const [dev, setDev] = useState(false);
 
   useNuiEvent<PlayerHudProps>('player', (data) => {
     setVisible(data.show);
@@ -74,20 +76,26 @@ const PlayerHud: React.FC = () => {
 
     setStamina(data.stamina);
     setArmed(data.armed);
-
     setDev(data.dev);
-  })
+  });
+
+  useNuiEvent('vehicle', (data) => {
+    setVehicleVisible(data.show);
+    setEngine(data.engine)
+  });
 
   return (
     <>
       {visible && (
         <div className={classes.container}>
-          <StatusBar visible={true} value={voiceValue} maxValue={6} color={voiceColor} icon={voiceIcon} />
-          <StatusBar visible={true} value={healthValue} color={healthColor} icon={healthIcon} />
-          <StatusBar visible={true} value={armourValue} color={armourColor} icon="fas fa-shield-alt" />
-          <StatusBar visible={true} value={staminaValue} color="#8aa8bd" icon="fas fa-lungs" />
-          <StatusBar visible={armedValue} value={100} color="#D6336C" icon="fas fa-stream" />
-          <StatusBar visible={devValue} value={100} color="#000000" icon="fas fa-terminal" />
+          <StatusBar visible={true} value={voice} maxValue={6} color={voiceColor} icon={voiceIcon} />
+          <StatusBar visible={true} value={health} color={healthColor} icon={healthIcon} />
+          <StatusBar visible={true} value={armour} color={armourColor} icon="fas fa-shield-alt" />
+          <StatusBar visible={true} value={stamina} color="#8aa8bd" icon="fas fa-lungs" />
+          <StatusBar visible={armed} value={100} color="#D6336C" icon="fas fa-stream" />
+          {vehicleVisible && (<StatusBar visible={true} value={engine} color="#FA5252" icon="fas fa-oil-can" />)}
+
+          <StatusBar visible={dev} value={100} color="#000000" icon="fas fa-terminal" />
         </div>
       )}
     </>
