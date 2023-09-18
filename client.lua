@@ -19,20 +19,20 @@ local function loadMap() -- Credit to Dalrae for the solve.
     if aspectRatio > defaultAspectRatio then
         minimapOffset = ((defaultAspectRatio-aspectRatio)/3.6)-0.008
     end
-    RequestStreamedTextureDict("squaremap", false)
-    if not HasStreamedTextureDictLoaded("squaremap") then
+    RequestStreamedTextureDict('squaremap', false)
+    if not HasStreamedTextureDictLoaded('squaremap') then
         Wait(150)
     end
     SetMinimapClipType(0)
-    AddReplaceTexture("platform:/textures/graphics", "radarmasksm", "squaremap", "radarmasksm")
-    AddReplaceTexture("platform:/textures/graphics", "radarmask1g", "squaremap", "radarmasksm")
+    AddReplaceTexture('platform:/textures/graphics', 'radarmasksm', 'squaremap', 'radarmasksm')
+    AddReplaceTexture('platform:/textures/graphics', 'radarmask1g', 'squaremap', 'radarmasksm')
     -- 0.0 = nav symbol and icons left
     -- 0.1638 = nav symbol and icons stretched
     -- 0.216 = nav symbol and icons raised up
-    SetMinimapComponentPosition("minimap", "L", "B", 0.0 + minimapOffset, -0.047, 0.1638, 0.183)
+    SetMinimapComponentPosition('minimap', 'L', 'B', 0.0 + minimapOffset, -0.047, 0.1638, 0.183)
 
     -- icons within map
-    SetMinimapComponentPosition("minimap_mask", "L", "B", 0.0 + minimapOffset, 0.0, 0.128, 0.20)
+    SetMinimapComponentPosition('minimap_mask', 'L', 'B', 0.0 + minimapOffset, 0.0, 0.128, 0.20)
 
     -- -0.01 = map pulled left
     -- 0.025 = map raised up
@@ -96,8 +96,28 @@ CreateThread(function()
                 armed = armed,
                 dev = dev
             })
+
+            -- Vehicle
+            local vehicle = GetVehiclePedIsIn(ped, false)
+            if (IsPedInAnyVehicle(ped) and not IsThisModelABicycle(vehicle)) and GetIsVehicleEngineRunning(vehicle) then -- In a vehicle
+                DisplayRadar(true)
+                updateHUD('vehicle', {
+                    show = show,
+                    speed = math.ceil(GetEntitySpeed(vehicle) * 2.236936),
+                    maxSpeed = math.ceil(GetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fInitialDriveMaxFlatVel')),
+                    rpm = GetVehicleCurrentRpm(vehicle),
+                    gear = GetVehicleCurrentGear(vehicle),
+                    fuel = GetVehicleFuelLevel(vehicle),
+                    locked = GetVehicleDoorLockStatus(vehicle),
+                    seatbelt = seatbelt,
+                    engine = (GetVehicleEngineHealth(vehicle) / 10),
+                })
+            else -- Not in a vehicle
+                updateHUD('vehicle', { show = false })
+            end
         else
             updateHUD('player', { show = false })
+            updateHUD('vehicle', { show = false })
         end
         Wait(200)
     end
