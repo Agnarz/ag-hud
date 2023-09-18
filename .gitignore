@@ -1,0 +1,5 @@
+
+.vscode/settings.json
+/web/node_modules
+/web/build
+/testing
