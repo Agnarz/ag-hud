@@ -1,7 +1,13 @@
 local nuiReady = false
+local show = false
+local dev = false
+local voice = 33
+local stamina = 100
+local armed = false
+local unarmed = -1609580060
+local parachute = false
 
 local function updateHUD(action, data)
-    if not nuiReady then return end
     SendNUIMessage({ action = action, data = data})
 end
 
@@ -45,4 +51,54 @@ RegisterNUICallback('init', function(_, cb)
     nuiReady = true
     Wait(100)
     loadMap()
+end)
+
+CreateThread(function()
+    while true do
+        if nuiReady then
+            local playerId = PlayerId()
+            local ped = PlayerPedId()
+            show = true
+            local paused = IsPauseMenuActive()
+            if paused then
+                show = false
+            end
+
+            -- armed
+            local weapon = GetSelectedPedWeapon(ped)
+            local weaponType = GetWeapontypeGroup(weapon)
+            if weaponType == unarmed then
+                armed = false
+            else
+                armed = true
+            end
+
+            -- Stamina/Oxygen
+            if not IsEntityInWater(ped) then
+                stamina = 100 - GetPlayerSprintStaminaRemaining(playerId)
+            end
+            -- Oxygen
+            if IsEntityInWater(ped) then
+                stamina = GetPlayerUnderwaterTimeRemaining(playerId) * 10
+            end
+
+            if LocalPlayer.state['proximity'] then
+                voice = LocalPlayer.state['proximity'].distance
+            end
+
+            updateHUD('player', {
+                show = show,
+                voice = voice,
+                talking = NetworkIsPlayerTalking(playerId),
+                health = GetEntityHealth(ped) - 100,
+                armour = GetPedArmour(ped),
+                stamina = stamina,
+                armed = armed,
+                dev = dev
+            })
+        else
+            updateHUD('player', { show = false })
+        end
+        Wait(200)
+    end
 end)
