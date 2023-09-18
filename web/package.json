@@ -18,6 +18,7 @@
     "@fortawesome/react-fontawesome": "^0.1.19",
     "@tabler/icons": "^1.112.0",
     "autoprefixer": "^10.4.13",
+    "framer-motion": "^8.0.2",
     "react-circular-progressbar": "^2.1.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
