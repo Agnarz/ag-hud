@@ -6,6 +6,7 @@ local stamina = 100
 local armed = false
 local unarmed = -1609580060
 local parachute = false
+local seatbelt = false
 
 local function updateHUD(action, data)
     SendNUIMessage({ action = action, data = data})
@@ -53,6 +54,47 @@ RegisterNUICallback('init', function(_, cb)
     loadMap()
 end)
 
+local lastCrossroadUpdate = 0
+local lastCrossroadCheck = {}
+
+local function getCrossroads(player)
+    local updateTick = GetGameTimer()
+    if updateTick - lastCrossroadUpdate > 1500 then
+        local pos = GetEntityCoords(player)
+        local street1, street2 = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
+        lastCrossroadUpdate = updateTick
+        lastCrossroadCheck = { GetStreetNameFromHashKey(street1), GetStreetNameFromHashKey(street2) }
+    end
+    return lastCrossroadCheck
+end
+
+---@param heading number
+---@return string direction
+local function convertHeading(heading)
+    local direction = "N"
+    if heading >= 0 and heading <= 22.5 then
+        direction = "N"
+    elseif heading > 22.5 and heading <= 67.5 then
+        direction = "NW"
+    elseif heading > 67.5 and heading <= 112.5 then
+        direction = "W"
+    elseif heading > 112.5 and heading <= 157.5 then
+        direction = "SW"
+    elseif heading > 157.5 and heading <= 202.5 then
+        direction = "S"
+    elseif heading > 202.5 and heading <= 247.5 then
+        direction = "SE"
+    elseif heading > 247.5 and heading <= 292.5 then
+        direction = "E"
+    elseif heading > 292.5 and heading <= 337.5 then
+        direction = "NE"
+    elseif heading > 337.5 and heading <= 360.0 then
+        direction = "N"
+    end
+
+    return direction
+end
+
 CreateThread(function()
     while true do
         if nuiReady then
@@ -96,10 +138,12 @@ CreateThread(function()
                 armed = armed,
                 dev = dev
             })
+            DisplayRadar(false)
 
             -- Vehicle
             local vehicle = GetVehiclePedIsIn(ped, false)
             if (IsPedInAnyVehicle(ped) and not IsThisModelABicycle(vehicle)) and GetIsVehicleEngineRunning(vehicle) then -- In a vehicle
+                local crossroads = getCrossroads(ped)
                 DisplayRadar(true)
                 updateHUD('vehicle', {
                     show = show,
@@ -112,12 +156,24 @@ CreateThread(function()
                     seatbelt = seatbelt,
                     engine = (GetVehicleEngineHealth(vehicle) / 10),
                 })
+
+                -- compass
+                local heading = GetEntityHeading(ped)
+                local coords = GetEntityCoords(ped)
+                updateHUD('compass', {
+                    show = true,
+                    crossroads = crossroads,
+                    heading = convertHeading(heading),
+                    zone = GetLabelText(GetNameOfZone(coords.x, coords.y, coords.z))
+                })
             else -- Not in a vehicle
                 updateHUD('vehicle', { show = false })
+                updateHUD('compass', { show = false })
             end
         else
             updateHUD('player', { show = false })
             updateHUD('vehicle', { show = false })
+            updateHUD('compass', { show = false })
         end
         Wait(200)
     end

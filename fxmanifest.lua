@@ -4,7 +4,7 @@ lua54 'yes'
 game 'gta5'
 
 name 'ag-hud'
-version '0.2.0'
+version '0.3.0'
 description 'HUD for FiveM'
 author 'Agnarz'
 repository 'https://github.com/Agnarz/ag-hud'
