@@ -69,7 +69,7 @@ const Speedometer: React.FC = () => {
         },
         path: {
           strokeLinecap: 'butt',
-          stroke: "#ff000088",
+          stroke: "#ff000077",
         },
         trail: {
           strokeLinecap: 'butt',
