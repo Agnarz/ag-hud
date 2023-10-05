@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { createStyles } from '@mantine/core';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import { useNuiEvent } from '../../../hooks/useNuiEvent';
-import 'react-circular-progressbar/dist/styles.css';
+import {
+  useSpeedValue,
+  useMaxSpeedValue,
+  useRpmValue,
+  useGearValue,
+} from "../../../state";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -42,24 +47,17 @@ const useStyles = createStyles((theme) => ({
 
 const Speedometer: React.FC = () => {
   const { classes } = useStyles();
-  const [speed , setSpeed] = useState(0);
-  const [maxSpeed , setMaxSpeed] = useState(0);
-  const [rpmValue , setRpmValue] = useState(0);
-  const [gear , setGear] = useState(0);
-
-  useNuiEvent("vehicle", (data) => {
-    setSpeed(data.speed);
-    setMaxSpeed(data.maxSpeed);
-    setRpmValue(data.rpm);
-    setGear(data.gear);
-  });
+  const speed = useSpeedValue();
+  const maxSpeed = useMaxSpeedValue();
+  const rpm = useRpmValue();
+  const gear = useGearValue();
 
   const speedType = 'MPH'
   return (
     <div className={classes.container}>
       <CircularProgressbar
       className={classes.progress}
-      value={rpmValue}
+      value={rpm}
       circleRatio={0.68}
       maxValue={1}
       strokeWidth={10}

@@ -4,6 +4,8 @@ import { CircularProgressbar } from 'react-circular-progressbar';
 import { useNuiEvent } from '../../../hooks/useNuiEvent';
 import 'react-circular-progressbar/dist/styles.css';
 
+import { useFuelValue } from "../../../state";
+
 const useStyles = createStyles((theme) => ({
   container: {
     position: "absolute",
@@ -31,11 +33,7 @@ const useStyles = createStyles((theme) => ({
 
 const Speedometer: React.FC = () => {
   const { classes } = useStyles();
-  const [fuel , setFuel] = useState(0);
-
-  useNuiEvent("vehicle", (data) => {
-    setFuel(data.fuel);
-  });
+  const fuel= useFuelValue();
 
   return (
     <div className={classes.container}>

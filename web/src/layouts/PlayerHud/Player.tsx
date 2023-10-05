@@ -1,7 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createStyles } from "@mantine/core";
 import { useNuiEvent } from '../../hooks/useNuiEvent';
+import { PlayerHudProps } from '../../types';
 import StatusBar from "./components/StatusBar";
+import {
+  useShowPlayer,
+  useVoice,
+  useHealth,
+  useArmour,
+  useHunger,
+  useThirst,
+  useStress,
+  useStamina,
+  useArmed,
+  useDev,
+  useShowVehicleValue,
+  useEngineValue
+} from "../../state";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -15,38 +30,29 @@ const useStyles = createStyles((theme) => ({
     alignContent: "center",
     alignItems: "left",
     gap: 10,
-    paddingLeft: 4,
+    paddingLeft: 4
   }
 }));
 
-export interface PlayerHudProps {
-  show: boolean;
-  voice: number;
-  talking: boolean;
-  health: number;
-  isDead: boolean;
-  armour: number;
-  stamina: number;
-  armed: boolean;
-  dev: boolean;
-}
-
 const PlayerHud: React.FC = () => {
   const { classes } = useStyles();
-  const [visible, setVisible] = useState(true);
-  const [voice, setVoice] = useState(0);
+  const [visible, setVisible] = useShowPlayer();
+  const [voice, setVoice] = useVoice();
   const [voiceColor, setVoiceColor] = useState("#ffffff");
   const [voiceIcon, setVoiceIcon] = useState("fas fa-microphone");
-  const [health, setHealth] = useState(0);
+  const [health, setHealth] = useHealth();
   const [healthColor, setHealthColor] = useState("#40C057");
   const [healthIcon, setHealthIcon] = useState("fas fa-heart");
-  const [armour, setArmour] = useState(0);
+  const [armour, setArmour] = useArmour();
   const [armourColor, setArmourColor] = useState("#1C7ED6");
-  const [stamina, setStamina] = useState(0);
-  const [armed, setArmed] = useState(false);
-  const [vehicleVisible, setVehicleVisible] = useState(false);
-  const [engine, setEngine] = useState(0);
-  const [dev, setDev] = useState(false);
+  const [hunger, setHunger] = useHunger();
+  const [thirst, setThirst] = useThirst();
+  const [stress, setStress] = useStress();
+  const [stamina, setStamina] = useStamina();
+  const [armed, setArmed] = useArmed();
+  const showVehicle = useShowVehicleValue();
+  const engine = useEngineValue();
+  const [dev, setDev] = useDev();
 
   useNuiEvent<PlayerHudProps>('player', (data) => {
     setVisible(data.show);
@@ -74,14 +80,12 @@ const PlayerHud: React.FC = () => {
       setArmourColor("#1C7ED6");
     }
 
+    setHunger(data.hunger);
+    setThirst(data.thirst);
+    setStress(data.stress);
     setStamina(data.stamina);
     setArmed(data.armed);
     setDev(data.dev);
-  });
-
-  useNuiEvent('vehicle', (data) => {
-    setVehicleVisible(data.show);
-    setEngine(data.engine)
   });
 
   return (
@@ -91,10 +95,12 @@ const PlayerHud: React.FC = () => {
           <StatusBar visible={true} value={voice} maxValue={6} color={voiceColor} icon={voiceIcon} />
           <StatusBar visible={true} value={health} color={healthColor} icon={healthIcon} />
           <StatusBar visible={true} value={armour} color={armourColor} icon="fas fa-shield-alt" />
+          {(hunger > -1) && (<StatusBar visible={true} value={hunger} color={'#FD7E14'} icon="fas fa-burger" />)}
+          {(thirst > -1) && (<StatusBar visible={true} value={thirst} color={'#339AF0'} icon="fas fa-droplet" />)}
+          {(stress > -1) && (<StatusBar visible={true} value={stress} color={'#f03e3e'} icon="fas fa-brain" />)}
           <StatusBar visible={true} value={stamina} color="#8aa8bd" icon="fas fa-lungs" />
-          <StatusBar visible={armed} value={100} color="#D6336C" icon="fas fa-stream" />
-          {vehicleVisible && (<StatusBar visible={true} value={engine} color="#FA5252" icon="fas fa-oil-can" />)}
-
+          <StatusBar visible={armed} value={100} color="#E64980" icon="fas fa-stream" />
+          {showVehicle && (<StatusBar visible={true} value={engine} color="#FA5252" icon="fas fa-oil-can" />)}
           <StatusBar visible={dev} value={100} color="#000000" icon="fas fa-terminal" />
         </div>
       )}

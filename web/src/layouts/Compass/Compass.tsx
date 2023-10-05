@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
 import { createStyles } from '@mantine/core';
 import { useNuiEvent } from '../../hooks/useNuiEvent';
-interface CompassProps {
-  show: boolean;
-  crossroads: any[];
-  heading: string;
-  zone: string;
-}
+import { CompassProps } from '../../types';
+import { useShowCompass, useCrossroads, useHeading, useZone } from '../../state';
+
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -20,21 +16,21 @@ const useStyles = createStyles((theme) => ({
     color: 'white',
     fontWeight: 700,
     fontSize: 16,
-    textShadow: '1px 1px 2px rgba(0, 0, 0, .5)',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, .5)'
   },
   separator: {
-    color: theme.colors.blue[3],
-  },
+    color: theme.colors.blue[3]
+  }
 }));
 
 const Compass: React.FC = () => {
   const { classes } = useStyles();
-  const [visible, setVisible] = useState<boolean>(true);
-  const [crossroads, setCrossroads] = useState(['', '']);
-  const [heading, setHeading] = useState<string>();
-  const [zone, setZone] = useState<string>('');
+  const [visible, setVisible] = useShowCompass();
+  const [crossroads, setCrossroads] = useCrossroads();
+  const [heading, setHeading] = useHeading();
+  const [zone, setZone] = useZone();
 
-  useNuiEvent('compass', (data: CompassProps) => {
+  useNuiEvent<CompassProps>('compass', (data) => {
     setVisible(data.show);
     setCrossroads(data.crossroads);
     setHeading(data.heading);

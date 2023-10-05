@@ -21,19 +21,18 @@ const useStyles = createStyles((theme) => ({
     justifyContent: "center",
     alignContent: "center",
     position: "relative",
-    width: 52,
-    height: 52,
+    width: 54,
+    height: 54,
   },
   iconContainer: {
     position: "relative",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignContent: "center",
     alignItems: "center",
     backgroundColor: theme.colors.dark[7],
-    height: 38,
-    width: 38,
+    height: 40,
+    width: 40,
     borderRadius: "100%",
   },
 }));
@@ -50,9 +49,7 @@ const StatusBar: React.FC<StatusBarProps> = (props) => {
             width: "100%",
             height: "100%",
             borderRadius: "100%",
-            opacity: 0.4,
-            background: props.color,
-            boxShadow: `0px 0px 2px 2px ${props.color}f2`,
+            background: props.color + "77",
           }}
         />
         <CircularProgressbarWithChildren

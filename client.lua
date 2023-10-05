@@ -2,14 +2,19 @@ local nuiReady = false
 local show = false
 local dev = false
 local voice = 33
+local hunger = -1
+local thirst = -1
+local stress = -1
 local stamina = 100
 local armed = false
 local unarmed = -1609580060
-local parachute = false
 local seatbelt = false
 
+---Update the HUD with new data
+---@param action string -- Action to perform
+---@param data string | table | number | boolean -- Data to send to the HUD
 local function updateHUD(action, data)
-    SendNUIMessage({ action = action, data = data})
+    SendNUIMessage({ action = action, data = data })
 end
 
 local function loadMap() -- Credit to Dalrae for the solve.
@@ -20,10 +25,12 @@ local function loadMap() -- Credit to Dalrae for the solve.
     if aspectRatio > defaultAspectRatio then
         minimapOffset = ((defaultAspectRatio-aspectRatio)/3.6)-0.008
     end
+
     RequestStreamedTextureDict('squaremap', false)
     if not HasStreamedTextureDictLoaded('squaremap') then
         Wait(150)
     end
+
     SetMinimapClipType(0)
     AddReplaceTexture('platform:/textures/graphics', 'radarmasksm', 'squaremap', 'radarmasksm')
     AddReplaceTexture('platform:/textures/graphics', 'radarmask1g', 'squaremap', 'radarmasksm')
@@ -44,6 +51,7 @@ local function loadMap() -- Credit to Dalrae for the solve.
     SetRadarBigmapEnabled(true, false)
     SetMinimapClipType(0)
     Wait(50)
+
     SetRadarBigmapEnabled(false, false)
 end
 
@@ -95,11 +103,53 @@ local function convertHeading(heading)
     return direction
 end
 
+if GetResourceState('qb-core') == 'started' then
+    local QBCore = exports['qb-core']:GetCoreObject()
+
+    AddEventHandler('onResourceStart', function(resourceName)
+        if GetCurrentResourceName() ~= resourceName then return end
+        local PlayerData = QBCore.Functions.GetPlayerData()
+        Wait(100)
+
+        if PlayerData and LocalPlayer.state['isLoggedIn'] then
+            hunger = PlayerData.metadata.hunger
+            thirst = PlayerData.metadata.thirst
+            stress = PlayerData.metadata.stress
+        end
+    end)
+
+    RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
+        local PlayerData = QBCore.Functions.GetPlayerData()
+        Wait(100)
+        if PlayerData then
+            hunger = PlayerData.metadata.hunger
+            thirst = PlayerData.metadata.thirst
+            stress = PlayerData.metadata.stress
+        end
+        show = true
+    end)
+
+    RegisterNetEvent('hud:client:UpdateNeeds', function(newHunger, newThirst) -- Triggered in qb-core
+        hunger = newHunger
+        thirst = newThirst
+    end)
+
+    RegisterNetEvent("QBCore:Client:OnPlayerUnload", function()
+        Wait(100)
+        hunger = -1
+        thirst = -1
+        stress = -1
+        DisplayRadar(false)
+        show = false
+    end)
+
+end
+
 CreateThread(function()
     while true do
         if nuiReady then
-            local playerId = PlayerId()
-            local ped = PlayerPedId()
+            local playerId = cache.playerId
+            local ped = cache.ped
             show = true
             local paused = IsPauseMenuActive()
             if paused then
@@ -134,6 +184,9 @@ CreateThread(function()
                 talking = NetworkIsPlayerTalking(playerId),
                 health = GetEntityHealth(ped) - 100,
                 armour = GetPedArmour(ped),
+                hunger = hunger,
+                thirst = thirst,
+                stress = stress,
                 stamina = stamina,
                 armed = armed,
                 dev = dev
@@ -152,9 +205,9 @@ CreateThread(function()
                     rpm = GetVehicleCurrentRpm(vehicle),
                     gear = GetVehicleCurrentGear(vehicle),
                     fuel = GetVehicleFuelLevel(vehicle),
+                    engine = (GetVehicleEngineHealth(vehicle) / 10),
                     locked = GetVehicleDoorLockStatus(vehicle),
                     seatbelt = seatbelt,
-                    engine = (GetVehicleEngineHealth(vehicle) / 10),
                 })
 
                 -- compass
